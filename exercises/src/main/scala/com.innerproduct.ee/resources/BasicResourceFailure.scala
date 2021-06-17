@@ -6,7 +6,11 @@ import com.innerproduct.ee.debug._
 object BasicResourceFailure extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     stringResource
-      .use(_ => IO.raiseError(new RuntimeException("oh noes!"))) // <1>
+      .use(_ =>
+        IO(println("inside use")) *> IO.raiseError[String](
+          new RuntimeException("oh noes!")
+        )
+      ) // <1>
       .attempt
       .debug
       .as(ExitCode.Success)

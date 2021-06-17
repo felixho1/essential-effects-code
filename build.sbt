@@ -32,6 +32,7 @@ lazy val exercises = (project in file("exercises"))
     // remove fatal warnings since exercises have unused and dead code blocks
     scalacOptions --= Seq(
       "-Xfatal-warnings"
+      //, "-Xlint:nullary-override"
     )
   )
 

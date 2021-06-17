@@ -15,7 +15,14 @@ object AsyncCompletable extends IOApp {
   def fromCF[A](cfa: IO[CompletableFuture[A]]): IO[A] =
     cfa.flatMap { fa =>
       IO.async { cb =>
-        val handler: (A, Throwable) => Unit = ??? // <1>
+        val handler: (A, Throwable) => Unit = { // <1>
+          case (a, null) => cb(Right(a))
+          case (null, t) => cb(Left(t))
+          case (a, t) =>
+            sys.error(
+              s"CompletableFuture handler should always have one null, got: $a,$t"
+            )
+        }
 
         fa.handle(handler.asJavaBiFunction) // <2>
 

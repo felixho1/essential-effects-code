@@ -12,22 +12,29 @@ object EarlyRelease extends IOApp {
       }
       .as(ExitCode.Success)
 
-  val dbConnectionResource: Resource[IO, DbConnection] =
+  val dbConnectionResource: Resource[IO, DbConnection] = {
+//    val xxx = configResource.use { config =>
+//      DbConnection.make(config.connectURL)
+//    }
     for {
       config <- configResource
       conn <- DbConnection.make(config.connectURL)
     } yield conn
+  }
 
-  lazy val configResource: Resource[IO, Config] = // <1>
-    for {
-      source <- sourceResource
-      config <- Resource.liftF(Config.fromSource(source)) // <2>
-    } yield config
+  lazy val configResource: Resource[IO, Config] = { // <1>
+    val xxx =
+      Resource.liftF(sourceResource.use(source => Config.fromSource(source)))
+    xxx
+//    for {
+//      source <- sourceResource
+//      config <- Resource.liftF(Config.fromSource(source)) // <2>
+//    } yield config
+  }
 
   lazy val sourceResource: Resource[IO, Source] =
     Resource.make(
-      IO(s"> opening Source to config")
-        .debug *> IO(Source.fromString(config))
+      IO(s"> opening Source to config").debug *> IO(Source.fromString(config))
     )(source => IO(s"< closing Source to config").debug *> IO(source.close))
 
   val config = "exampleConnectURL"
